@@ -138,7 +138,7 @@
                   最新版</span><span class="fa arrow"></span></a>
               <ul class="nav nav-second-level">
                 <li>
-                  <a href="./default.html">微信对话生成
+                  <a href="./index.html">微信对话生成
                     <!-- <b style="color: #ff0000!important">可发图</b> -->
                   </a>
                 </li>
@@ -322,6 +322,9 @@
                     <option value="">文本模式</option>
                     <option value="i-bottom2">语音模式</option>
                   </select>
+                </p>
+                <p>
+                  <button id="btn">生成图片</button>
                 </p>
                 <div style="overflow:hidden;margin:20px 0 40px 0;">
 
@@ -1100,17 +1103,75 @@
       }
     })();
   </script>
-  <div style="display: none">
-    <script>
-      var _hmt = _hmt || [];
-      (function () {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?010af47f72a51e97131f1828d7caabb8";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
-  </div>
+<script type="text/javascript">
+$(document).ready(function(){
+    // canvas生成图片
+        $("#btn").on("click", function () {
+            var getPixelRatio = function (context) { // 获取设备的PixelRatio
+                var backingStore = context.backingStorePixelRatio ||
+                    context.webkitBackingStorePixelRatio ||
+                    context.mozBackingStorePixelRatio ||
+                    context.msBackingStorePixelRatio ||
+                    context.oBackingStorePixelRatio ||
+                    context.backingStorePixelRatio || 0.5;
+                return (window.devicePixelRatio || 0.5) / backingStore;
+            };
+            //生成的图片名称
+            var imgName = "cs.jpg";
+            var shareContent = document.getElementById("iphone");
+            var width = shareContent.offsetWidth;
+            var height = shareContent.offsetHeight;
+            var canvas = document.createElement("canvas");
+            var context = canvas.getContext('2d');
+            var scale = getPixelRatio(context); //将canvas的容器扩大PixelRatio倍，再将画布缩放，将图像放大PixelRatio倍。
+            canvas.width = width * scale;
+            canvas.height = height * scale;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            context.scale(scale, scale);
+
+            var opts = {
+                scale: scale,
+                canvas: canvas,
+                width: width,
+                height: height,
+                dpi: window.devicePixelRatio
+            };
+            html2canvas(shareContent, opts).then(function (canvas) {
+                context.imageSmoothingEnabled = false;
+                context.webkitImageSmoothingEnabled = false;
+                context.msImageSmoothingEnabled = false;
+                context.imageSmoothingEnabled = false;
+                var dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+                dataURIToBlob(imgName, dataUrl, callback);
+            });
+        });
+})
+    
+
+        // edited from https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob#Polyfill
+       var dataURIToBlob =  function (imgName, dataURI, callback) {
+            var binStr = atob(dataURI.split(',')[1]),
+                len = binStr.length,
+                arr = new Uint8Array(len);
+
+            for (var i = 0; i < len; i++) {
+                arr[i] = binStr.charCodeAt(i);
+            }
+
+            callback(imgName, new Blob([arr]));
+        }
+
+        var callback = function (imgName, blob) {
+            var triggerDownload = $("<a>").attr("href", URL.createObjectURL(blob)).attr("download", imgName).appendTo("body").on("click", function () {
+                if (navigator.msSaveBlob) {
+                    return navigator.msSaveBlob(blob, imgName);
+                }
+            });
+            triggerDownload[0].click();
+            triggerDownload.remove();
+        };
+</script>
 </body>
 
 </html>
